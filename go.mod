@@ -1,6 +1,6 @@
 module github.com/Artziel/go-utilities
 
-go 1.18
+go 1.19
 
 require (
 	github.com/go-sql-driver/mysql v1.6.0
@@ -8,4 +8,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
+require golang.org/x/sys v0.0.0-20220804214406-8e32c043e418 // indirect
