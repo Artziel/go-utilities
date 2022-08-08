@@ -1,4 +1,4 @@
-module github.com/Artziel/go-utilities
+module github.com/artziel/go-utilities
 
 go 1.19
 
