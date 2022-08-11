@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+const testFileBody = `This is a test file body. File Output must match.`
+
 func TestYAMLFile(t *testing.T) {
 
 	fileName := "./sample.yaml"
@@ -141,6 +143,24 @@ func TestCreatePaths(t *testing.T) {
 		}
 		if test.Expected != nil && result == nil {
 			t.Errorf("Test %v return unexpected result: got No Error want ErrPathsCantBeCreate", i)
+		}
+	}
+}
+
+func TestSaveToNewTXTFile(t *testing.T) {
+	file := "/tmp/test.file"
+	err := SaveToNewTXTFile(file, testFileBody)
+
+	if err != nil {
+		t.Errorf("Test SaveToNewTXTFile return unexpected error:\ngot  %s\nwant No Error", err)
+	} else {
+		content, err := os.ReadFile(file)
+		if err != nil {
+			t.Errorf("Test SaveToNewTXTFile file do not save file")
+		} else {
+			if string(content) != testFileBody {
+				t.Errorf("Test SaveToNewTXTFile file unexpected content:\ngot  %s\nwant %s", string(content), testFileBody)
+			}
 		}
 	}
 }

@@ -55,11 +55,17 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">gitlab.com/alus/go-utilities/files.go (100.0%)</option>
+				<option value="file0">github.com/artziel/go-utilities/files.go (100.0%)</option>
 				
-				<option value="file1">gitlab.com/alus/go-utilities/mysql.go (0.0%)</option>
+				<option value="file1">github.com/artziel/go-utilities/linux.go (0.0%)</option>
 				
-				<option value="file2">gitlab.com/alus/go-utilities/strings.go (100.0%)</option>
+				<option value="file2">github.com/artziel/go-utilities/mysql.go (0.0%)</option>
+				
+				<option value="file3">github.com/artziel/go-utilities/strings.go (100.0%)</option>
+				
+				<option value="file4">github.com/artziel/go-utilities/system.go (0.0%)</option>
+				
+				<option value="file5">github.com/artziel/go-utilities/terminal.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -76,8 +82,8 @@
 		<pre class="file" id="file0" style="display: none">package GoUtilities
 
 import (
+        "bufio"
         "errors"
-        "io/ioutil"
         "os"
         "path/filepath"
         "regexp"
@@ -132,7 +138,7 @@ func CreatePaths(paths []string) error <span class="cov8" title="1">{
 }
 
 func ReadYAML(fileName string, data interface{}) error <span class="cov8" title="1">{
-        file, err := ioutil.ReadFile(fileName)
+        file, err := os.ReadFile(fileName)
 
         if err == nil </span><span class="cov8" title="1">{
                 err = yaml.Unmarshal(file, &amp;data)
@@ -146,7 +152,7 @@ func WriteYAML(fileName string, d interface{}) error <span class="cov8" title="1
         data, err := yaml.Marshal(&amp;d)
 
         if err == nil </span><span class="cov8" title="1">{
-                err = ioutil.WriteFile(fileName, data, 0)
+                err = os.WriteFile(fileName, data, 0)
                 if err == nil </span><span class="cov8" title="1">{
                         os.Chmod(fileName, 0750)
                 }</span>
@@ -154,9 +160,74 @@ func WriteYAML(fileName string, d interface{}) error <span class="cov8" title="1
 
         <span class="cov8" title="1">return err</span>
 }
+
+func SaveToNewTXTFile(fileName string, content string) error <span class="cov8" title="1">{
+        var err error
+
+        f, err := os.Create(fileName)
+        if err == nil </span><span class="cov8" title="1">{
+                w := bufio.NewWriter(f)
+                _, err = w.WriteString(content)
+                w.Flush()
+        }</span>
+        <span class="cov8" title="1">defer f.Close()
+
+        return err</span>
+}
 </pre>
 		
 		<pre class="file" id="file1" style="display: none">package GoUtilities
+
+import (
+        "errors"
+        "os"
+        "regexp"
+        "runtime"
+        "strings"
+)
+
+var ErrNotLinuxSystem error = errors.New("the program is not running on a linux system")
+
+func getLinuxInfo(sys *System) error <span class="cov0" title="0">{
+        var err error
+
+        getVal := func(source string, name string) string </span><span class="cov0" title="0">{
+                result := ""
+
+                r := regexp.MustCompile(`(\A|\r|\n|\r\n|\s.?)` + name + `=(.*)\n`)
+                match := r.FindStringSubmatch(source)
+                if len(match) &gt; 0 </span><span class="cov0" title="0">{
+                        result = strings.ReplaceAll(match[2], "\"", "")
+                }</span>
+
+                <span class="cov0" title="0">return result</span>
+        }
+
+        <span class="cov0" title="0">if strings.ToLower(runtime.GOOS) != "linux" </span><span class="cov0" title="0">{
+                err = ErrNotLinuxSystem
+        }</span> else<span class="cov0" title="0"> {
+                if _, err := os.Stat("/lib64/ld-linux-x86-64.so.2"); err == nil </span><span class="cov0" title="0">{
+                        sys.OS.Architecture = "amd64"
+                }</span> else<span class="cov0" title="0"> if _, err := os.Stat("/lib/ld-linux.so.2"); err == nil </span><span class="cov0" title="0">{
+                        sys.OS.Architecture = "i386"
+                }</span>
+
+                <span class="cov0" title="0">content := ""
+                b, e := os.ReadFile("/etc/os-release")
+                if e == nil </span><span class="cov0" title="0">{
+                        content = string(b)
+                        sys.OS.Name = getVal(content, "PRETTY_NAME")
+                        sys.OS.Distro = getVal(content, "ID")
+                        sys.OS.Version = getVal(content, "VERSION")
+                        sys.OS.VersionID = getVal(content, "VERSION_ID")
+                        sys.OS.CodeName = getVal(content, "VERSION_CODENAME")
+                }</span>
+        }
+        <span class="cov0" title="0">return err</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package GoUtilities
 
 import (
         go_mysql "github.com/go-sql-driver/mysql"
@@ -172,7 +243,7 @@ func MySQLErrorCode(err error) int <span class="cov0" title="0">{
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">package GoUtilities
+		<pre class="file" id="file3" style="display: none">package GoUtilities
 
 import "strings"
 
@@ -203,6 +274,73 @@ func SplitLines(str string) []string <span class="cov8" title="1">{
                 }</span>
         }
         <span class="cov8" title="1">return lines</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package GoUtilities
+
+import (
+        "errors"
+        "os/user"
+        "runtime"
+        "strings"
+)
+
+var ErrUnableToGetUser error = errors.New("unable to get current user")
+var ErrInputValueUnexpected error = errors.New("unexpected input value")
+var ErrUnsupportedSystem error = errors.New("the current OS is not supported")
+
+type OS struct {
+        Type         string `json:"Type"`
+        Name         string `json:"Name"`
+        Distro       string `json:"Distro"`
+        Version      string `json:"Version"`
+        VersionID    string `json:"VersionID"`
+        CodeName     string `json:"CodeName"`
+        Architecture string `json:"Architecture"`
+}
+
+type System struct {
+        OS OS `json:"OS"`
+}
+
+func IsRoot() (bool, error) <span class="cov0" title="0">{
+        currentUser, err := user.Current()
+        if err != nil </span><span class="cov0" title="0">{
+                return false, ErrUnableToGetUser
+        }</span>
+        <span class="cov0" title="0">return currentUser.Username == "root", nil</span>
+}
+
+func GetSystemInfo() (System, error) <span class="cov0" title="0">{
+        var err error
+        osType := strings.ToLower(runtime.GOOS)
+        sys := System{OS: OS{Type: osType}}
+
+        switch sys.OS.Type </span>{
+        case "linux":<span class="cov0" title="0">
+                getLinuxInfo(&amp;sys)</span>
+        default:<span class="cov0" title="0">
+                err = ErrUnsupportedSystem</span>
+        }
+
+        <span class="cov0" title="0">return sys, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package GoUtilities
+
+import "golang.org/x/term"
+
+func GetTerminalSize() (int, int) <span class="cov0" title="0">{
+        if !term.IsTerminal(0) </span><span class="cov0" title="0">{
+                return 0, 0
+        }</span>
+        <span class="cov0" title="0">width, height, err := term.GetSize(0)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, 0
+        }</span>
+        <span class="cov0" title="0">return width, height</span>
 }
 </pre>
 		

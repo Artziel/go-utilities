@@ -1,6 +1,7 @@
 package GoUtilities
 
 import (
+	"bufio"
 	"errors"
 	"os"
 	"path/filepath"
@@ -75,6 +76,20 @@ func WriteYAML(fileName string, d interface{}) error {
 			os.Chmod(fileName, 0750)
 		}
 	}
+
+	return err
+}
+
+func SaveToNewTXTFile(fileName string, content string) error {
+	var err error
+
+	f, err := os.Create(fileName)
+	if err == nil {
+		w := bufio.NewWriter(f)
+		_, err = w.WriteString(content)
+		w.Flush()
+	}
+	defer f.Close()
 
 	return err
 }
