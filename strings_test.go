@@ -25,7 +25,7 @@ func TestStringTruncate(t *testing.T) {
 	}
 }
 
-func TestSplitLinest(t *testing.T) {
+func TestSplitLines(t *testing.T) {
 	type Test struct {
 		Input    string
 		Expected int

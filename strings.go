@@ -3,7 +3,6 @@ package GoUtilities
 import "strings"
 
 func StringTruncate(str string, length int) string {
-
 	truncated := ""
 
 	if length > 0 {
@@ -15,7 +14,6 @@ func StringTruncate(str string, length int) string {
 				break
 			}
 		}
-
 	}
 	return truncated
 }
