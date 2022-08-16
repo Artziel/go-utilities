@@ -57,13 +57,13 @@
 				
 				<option value="file0">github.com/artziel/go-utilities/files.go (100.0%)</option>
 				
-				<option value="file1">github.com/artziel/go-utilities/linux.go (0.0%)</option>
+				<option value="file1">github.com/artziel/go-utilities/linux.go (92.9%)</option>
 				
 				<option value="file2">github.com/artziel/go-utilities/mysql.go (0.0%)</option>
 				
 				<option value="file3">github.com/artziel/go-utilities/strings.go (100.0%)</option>
 				
-				<option value="file4">github.com/artziel/go-utilities/system.go (0.0%)</option>
+				<option value="file4">github.com/artziel/go-utilities/system.go (81.8%)</option>
 				
 				<option value="file5">github.com/artziel/go-utilities/terminal.go (0.0%)</option>
 				
@@ -188,42 +188,56 @@ import (
 
 var ErrNotLinuxSystem error = errors.New("the program is not running on a linux system")
 
-func getLinuxInfo(sys *System) error <span class="cov0" title="0">{
-        var err error
+func isLinuxSystem() bool <span class="cov8" title="1">{
+        return strings.ToLower(runtime.GOOS) == "linux"
+}</span>
 
-        getVal := func(source string, name string) string </span><span class="cov0" title="0">{
+func getLinuxArchitecture() string <span class="cov8" title="1">{
+        var arch string
+
+        if _, err := os.Stat("/lib64/ld-linux-x86-64.so.2"); err == nil </span><span class="cov8" title="1">{
+                arch = "amd64"
+        }</span>
+        <span class="cov8" title="1">if _, err2 := os.Stat("/lib/ld-linux.so.2"); err2 == nil </span><span class="cov0" title="0">{
+                arch = "i386"
+        }</span>
+
+        <span class="cov8" title="1">return arch</span>
+}
+
+func getLinuxInfo(sys *System) error <span class="cov8" title="1">{
+        if !isLinuxSystem() </span><span class="cov0" title="0">{
+                return ErrNotLinuxSystem
+        }</span>
+
+        <span class="cov8" title="1">var err error
+
+        getVal := func(source string, name string) string </span><span class="cov8" title="1">{
                 result := ""
 
                 r := regexp.MustCompile(`(\A|\r|\n|\r\n|\s.?)` + name + `=(.*)\n`)
                 match := r.FindStringSubmatch(source)
-                if len(match) &gt; 0 </span><span class="cov0" title="0">{
+                if len(match) &gt; 0 </span><span class="cov8" title="1">{
                         result = strings.ReplaceAll(match[2], "\"", "")
                 }</span>
 
-                <span class="cov0" title="0">return result</span>
+                <span class="cov8" title="1">return result</span>
         }
 
-        <span class="cov0" title="0">if strings.ToLower(runtime.GOOS) != "linux" </span><span class="cov0" title="0">{
-                err = ErrNotLinuxSystem
-        }</span> else<span class="cov0" title="0"> {
-                if _, err := os.Stat("/lib64/ld-linux-x86-64.so.2"); err == nil </span><span class="cov0" title="0">{
-                        sys.OS.Architecture = "amd64"
-                }</span> else<span class="cov0" title="0"> if _, err := os.Stat("/lib/ld-linux.so.2"); err == nil </span><span class="cov0" title="0">{
-                        sys.OS.Architecture = "i386"
-                }</span>
+        <span class="cov8" title="1">sys.OS.Architecture = getLinuxArchitecture()
 
-                <span class="cov0" title="0">content := ""
-                b, e := os.ReadFile("/etc/os-release")
-                if e == nil </span><span class="cov0" title="0">{
-                        content = string(b)
-                        sys.OS.Name = getVal(content, "PRETTY_NAME")
-                        sys.OS.Distro = getVal(content, "ID")
-                        sys.OS.Version = getVal(content, "VERSION")
-                        sys.OS.VersionID = getVal(content, "VERSION_ID")
-                        sys.OS.CodeName = getVal(content, "VERSION_CODENAME")
-                }</span>
-        }
-        <span class="cov0" title="0">return err</span>
+        content := ""
+        b, e := os.ReadFile("/etc/os-release")
+        if e == nil </span><span class="cov8" title="1">{
+                content = string(b)
+                sys.OS.Name = getVal(content, "PRETTY_NAME")
+                sys.OS.Distro = getVal(content, "ID")
+                sys.OS.Version = getVal(content, "VERSION")
+                sys.OS.VersionID = getVal(content, "VERSION_ID")
+                sys.OS.CodeName = getVal(content, "VERSION_CODENAME")
+        }</span>
+
+        <span class="cov8" title="1">return err</span>
 }
 </pre>
 		
@@ -248,7 +262,6 @@ func MySQLErrorCode(err error) int <span class="cov0" title="0">{
 import "strings"
 
 func StringTruncate(str string, length int) string <span class="cov8" title="1">{
-
         truncated := ""
 
         if length &gt; 0 </span><span class="cov8" title="1">{
@@ -260,7 +273,6 @@ func StringTruncate(str string, length int) string <span class="cov8" title="1">
                                 break</span>
                         }
                 }
-
         }
         <span class="cov8" title="1">return truncated</span>
 }
@@ -304,27 +316,27 @@ type System struct {
         OS OS `json:"OS"`
 }
 
-func IsRoot() (bool, error) <span class="cov0" title="0">{
+func IsRoot() (bool, error) <span class="cov8" title="1">{
         currentUser, err := user.Current()
         if err != nil </span><span class="cov0" title="0">{
                 return false, ErrUnableToGetUser
         }</span>
-        <span class="cov0" title="0">return currentUser.Username == "root", nil</span>
+        <span class="cov8" title="1">return currentUser.Username == "root", nil</span>
 }
 
-func GetSystemInfo() (System, error) <span class="cov0" title="0">{
+func GetSystemInfo() (System, error) <span class="cov8" title="1">{
         var err error
         osType := strings.ToLower(runtime.GOOS)
         sys := System{OS: OS{Type: osType}}
 
         switch sys.OS.Type </span>{
-        case "linux":<span class="cov0" title="0">
+        case "linux":<span class="cov8" title="1">
                 getLinuxInfo(&amp;sys)</span>
         default:<span class="cov0" title="0">
                 err = ErrUnsupportedSystem</span>
         }
 
-        <span class="cov0" title="0">return sys, err</span>
+        <span class="cov8" title="1">return sys, err</span>
 }
 </pre>
 		
