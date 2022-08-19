@@ -27,4 +27,12 @@ func TestIsRoot(t *testing.T) {
 	if err != nil {
 		t.Errorf("Test IsRoot unexpected error:\ngot  %s\nwant No Error", err)
 	}
+
+	if err == ErrUnableToGetUser {
+		t.Errorf("Test IsRoot unexpected error:\ngot  %s\nwant No Error", err)
+	}
+
+	if err == ErrUnsupportedSystem {
+		t.Errorf("Test IsRoot unexpected error:\ngot  %s\nwant No Error", err)
+	}
 }
