@@ -59,13 +59,11 @@
 				
 				<option value="file1">github.com/artziel/go-utilities/linux.go (92.9%)</option>
 				
-				<option value="file2">github.com/artziel/go-utilities/mysql.go (0.0%)</option>
+				<option value="file2">github.com/artziel/go-utilities/strings.go (92.7%)</option>
 				
-				<option value="file3">github.com/artziel/go-utilities/strings.go (100.0%)</option>
+				<option value="file3">github.com/artziel/go-utilities/system.go (81.8%)</option>
 				
-				<option value="file4">github.com/artziel/go-utilities/system.go (81.8%)</option>
-				
-				<option value="file5">github.com/artziel/go-utilities/terminal.go (0.0%)</option>
+				<option value="file4">github.com/artziel/go-utilities/terminal.go (0.0%)</option>
 				
 				</select>
 			</div>
@@ -244,22 +242,10 @@ func getLinuxInfo(sys *System) error <span class="cov8" title="1">{
 		<pre class="file" id="file2" style="display: none">package GoUtilities
 
 import (
-        go_mysql "github.com/go-sql-driver/mysql"
+        "fmt"
+        "math"
+        "strings"
 )
-
-func MySQLErrorCode(err error) int <span class="cov0" title="0">{
-        result := 0
-        if mysqlError, ok := err.(*go_mysql.MySQLError); ok </span><span class="cov0" title="0">{
-                result = int(mysqlError.Number)
-        }</span>
-
-        <span class="cov0" title="0">return result</span>
-}
-</pre>
-		
-		<pre class="file" id="file3" style="display: none">package GoUtilities
-
-import "strings"
 
 func StringTruncate(str string, length int) string <span class="cov8" title="1">{
         truncated := ""
@@ -287,9 +273,58 @@ func SplitLines(str string) []string <span class="cov8" title="1">{
         }
         <span class="cov8" title="1">return lines</span>
 }
+
+func HummanReadSize(bytes int64) string <span class="cov8" title="1">{
+        if bytes &lt; 1024 </span><span class="cov8" title="1">{
+                return fmt.Sprintf("%dB", bytes)
+        }</span>
+        <span class="cov8" title="1">if bytes &lt; 1048576 </span><span class="cov8" title="1">{
+                v := float64(bytes) / 1024.0
+                if math.Mod(v, 1) != 0 </span><span class="cov8" title="1">{
+                        return fmt.Sprintf("%.2fKB", v)
+                }</span> else<span class="cov8" title="1"> {
+                        return fmt.Sprintf("%.0fKB", v)
+                }</span>
+        }
+        <span class="cov8" title="1">if bytes &lt; 1073741824 </span><span class="cov8" title="1">{
+                v := float64(bytes) / 1048576.0
+                if math.Mod(v, 1) != 0 </span><span class="cov8" title="1">{
+                        return fmt.Sprintf("%.2fMB", v)
+                }</span> else<span class="cov0" title="0"> {
+                        return fmt.Sprintf("%.0fMB", v)
+                }</span>
+        }
+
+        <span class="cov8" title="1">v := float64(bytes) / 1073741824.0
+        if math.Mod(v, 1) != 0 </span><span class="cov8" title="1">{
+                return fmt.Sprintf("%.2fGB", v)
+        }</span> else<span class="cov0" title="0"> {
+                return fmt.Sprintf("%.0fGB", v)
+        }</span>
+}
+
+func HumanReadDuration(ms int64) string <span class="cov8" title="1">{
+        if ms &lt; 1000 </span><span class="cov8" title="1">{
+                return fmt.Sprintf("%dms", ms)
+        }</span> else<span class="cov8" title="1"> if ms &lt; 60000 </span><span class="cov8" title="1">{
+                v := float64(ms) / 1000.0
+                if math.Mod(v, 1) != 0 </span><span class="cov8" title="1">{
+                        return fmt.Sprintf("%.2fsec", v)
+                }</span> else<span class="cov8" title="1"> {
+                        return fmt.Sprintf("%.0fsec", v)
+                }</span>
+        }
+
+        <span class="cov8" title="1">v := float64(ms) / 60000.0
+        if math.Mod(v, 1) != 0 </span><span class="cov0" title="0">{
+                return fmt.Sprintf("%.2fmin", v)
+        }</span> else<span class="cov8" title="1"> {
+                return fmt.Sprintf("%.0fmin", v)
+        }</span>
+}
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package GoUtilities
+		<pre class="file" id="file3" style="display: none">package GoUtilities
 
 import (
         "errors"
@@ -340,7 +375,7 @@ func GetSystemInfo() (System, error) <span class="cov8" title="1">{
 }
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package GoUtilities
+		<pre class="file" id="file4" style="display: none">package GoUtilities
 
 import "golang.org/x/term"
 

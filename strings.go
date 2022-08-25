@@ -2,6 +2,7 @@ package GoUtilities
 
 import (
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -33,28 +34,50 @@ func SplitLines(str string) []string {
 }
 
 func HummanReadSize(bytes int64) string {
-	val := ""
 	if bytes < 1024 {
-		val = fmt.Sprintf("%dB", bytes)
-	} else if bytes < 1048576 {
-		val = fmt.Sprintf("%.2fKB", float64(bytes)/1048576.0)
-	} else if bytes < 1073741824 {
-		val = fmt.Sprintf("%.2fMB", float64(bytes)/1073741824.0)
-	} else {
-		val = fmt.Sprintf("%.2fGB", float64(bytes)/1073741824.0)
+		return fmt.Sprintf("%dB", bytes)
 	}
-	return val
+	if bytes < 1048576 {
+		v := float64(bytes) / 1024.0
+		if math.Mod(v, 1) != 0 {
+			return fmt.Sprintf("%.2fKB", v)
+		} else {
+			return fmt.Sprintf("%.0fKB", v)
+		}
+	}
+	if bytes < 1073741824 {
+		v := float64(bytes) / 1048576.0
+		if math.Mod(v, 1) != 0 {
+			return fmt.Sprintf("%.2fMB", v)
+		} else {
+			return fmt.Sprintf("%.0fMB", v)
+		}
+	}
+
+	v := float64(bytes) / 1073741824.0
+	if math.Mod(v, 1) != 0 {
+		return fmt.Sprintf("%.2fGB", v)
+	} else {
+		return fmt.Sprintf("%.0fGB", v)
+	}
 }
 
 func HumanReadDuration(ms int64) string {
-	val := ""
 	if ms < 1000 {
-		val = fmt.Sprintf("%dms", ms)
+		return fmt.Sprintf("%dms", ms)
 	} else if ms < 60000 {
-		val = fmt.Sprintf("%.2fsec", float64(ms)/1000.0)
-	} else {
-		val = fmt.Sprintf("%.2fmin", float64(ms)/60000.0)
+		v := float64(ms) / 1000.0
+		if math.Mod(v, 1) != 0 {
+			return fmt.Sprintf("%.2fsec", v)
+		} else {
+			return fmt.Sprintf("%.0fsec", v)
+		}
 	}
 
-	return val
+	v := float64(ms) / 60000.0
+	if math.Mod(v, 1) != 0 {
+		return fmt.Sprintf("%.2fmin", v)
+	} else {
+		return fmt.Sprintf("%.0fmin", v)
+	}
 }

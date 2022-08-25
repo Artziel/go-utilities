@@ -44,3 +44,46 @@ func TestSplitLines(t *testing.T) {
 		}
 	}
 }
+
+func TestHummanReadDuration(t *testing.T) {
+	type Test struct {
+		Input    int64
+		Expected string
+	}
+
+	tests := []Test{
+		{Input: 500, Expected: "500ms"},
+		{Input: 2000, Expected: "2sec"},
+		{Input: 3050, Expected: "3.05sec"},
+		{Input: 120000, Expected: "2min"},
+	}
+
+	for i, test := range tests {
+		result := HumanReadDuration(test.Input)
+		if test.Expected != result {
+			t.Errorf("Test %v return unexpected HummanReadSize string:\ngot  %s\nwant %s", i, result, test.Expected)
+		}
+	}
+}
+
+func TestHummanReadSize(t *testing.T) {
+	type Test struct {
+		Input    int64
+		Expected string
+	}
+
+	tests := []Test{
+		{Input: 500, Expected: "500B"},
+		{Input: 2048, Expected: "2KB"},
+		{Input: 3048, Expected: "2.98KB"},
+		{Input: 10737418, Expected: "10.24MB"},
+		{Input: 14793741824, Expected: "13.78GB"},
+	}
+
+	for i, test := range tests {
+		result := HummanReadSize(test.Input)
+		if test.Expected != result {
+			t.Errorf("Test %v return unexpected HummanReadSize string:\ngot  %s\nwant %s", i, result, test.Expected)
+		}
+	}
+}

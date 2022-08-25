@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 
 	Util "github.com/artziel/go-utilities"
@@ -21,5 +22,11 @@ func printSystemInfo() {
 }
 
 func main() {
-	printSystemInfo()
+
+	dec := 3.0
+	frac := math.Mod(dec, 1)
+
+	fmt.Printf("%v\n", frac)
+
+	// printSystemInfo()
 }
