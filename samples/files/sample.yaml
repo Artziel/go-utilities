@@ -1,0 +1,5 @@
+host: "localhost"
+port: 8080
+username: "sample@sample.com"
+password: "123456"
+status: "ACTIVE"

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -14,6 +15,7 @@ import (
 var ErrPathsCantBeCreate error = errors.New("one or more paths can not be created, check your access permits")
 var ErrYAMLFileCanNotBeParsed error = errors.New("the YAML config file can not be parsed")
 var ErrYAMLFileNotFound error = errors.New("the YAML file can not be found or read")
+var ErrYAMLFileReadInvalidInterface error = errors.New("expected pointer interface for ReadYAML data parameter ")
 
 func PWD() (string, error) {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -57,10 +59,15 @@ func CreatePaths(paths []string) error {
 }
 
 func ReadYAML(fileName string, data interface{}) error {
+	k := reflect.ValueOf(data).Kind()
+	if k != reflect.Ptr {
+		return ErrYAMLFileReadInvalidInterface
+	}
+
 	file, err := os.ReadFile(fileName)
 
 	if err == nil {
-		err = yaml.Unmarshal(file, &data)
+		err = yaml.Unmarshal(file, data)
 	}
 
 	return err
